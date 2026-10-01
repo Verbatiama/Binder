@@ -1,17 +1,12 @@
 import CardSlot from "./CardSlot.jsx";
-import { retrieveCardImage } from "../lib/cards.js";
+import { getPageImages } from "../lib/cards.js";
 
-const SLOTS_PER_PAGE = 9;
+export const SLOTS_PER_PAGE = 9;
 
 export default function Page({ id, pageNumber, cards, onSelect }) {
-  const images = Array(SLOTS_PER_PAGE).fill(null);
-  if (cards) {
-    cards
-      .filter((card) => card.Page == pageNumber)
-      .forEach((card) => {
-        images[card.Slot - 1] = retrieveCardImage(card);
-      });
-  }
+  const images = cards
+    ? getPageImages(cards, pageNumber, SLOTS_PER_PAGE)
+    : Array(SLOTS_PER_PAGE).fill(null);
 
   // Before cards load, slots stay as empty placeholders
   let placeholder = "";

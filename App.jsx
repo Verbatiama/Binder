@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import Page from "./components/Page.jsx";
+import Page, { SLOTS_PER_PAGE } from "./components/Page.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
-import { fetchAndMergeCollections } from "./lib/cards.js";
+import { fetchAndMergeCollections, prefetchPageImages } from "./lib/cards.js";
 
 export default function App() {
   const [cards, setCards] = useState(null);
@@ -13,6 +13,18 @@ export default function App() {
   useEffect(() => {
     fetchAndMergeCollections().then(setCards);
   }, []);
+
+  useEffect(() => {
+    setJumpValue(String(Math.max(leftPage, 1)));
+  }, [leftPage]);
+
+  // Prefetch the previous and next spreads
+  useEffect(() => {
+    if (!cards) return;
+    [leftPage - 2, leftPage - 1, leftPage + 2, leftPage + 3].forEach((page) =>
+      prefetchPageImages(cards, page, SLOTS_PER_PAGE),
+    );
+  }, [cards, leftPage]);
 
   function changePage(delta) {
     if (leftPage + delta < 0) return;
@@ -44,10 +56,28 @@ export default function App() {
       </a>
       <div className="binder-container">
         <div className="binder">
-          <div className="binder-edge left" onClick={() => changePage(-2)} title="Previous"></div>
-          <Page id="left-page" pageNumber={leftPage} cards={cards} onSelect={setOverlayUrl} />
-          <Page id="right-page" pageNumber={rightPage} cards={cards} onSelect={setOverlayUrl} />
-          <div className="binder-edge right" onClick={() => changePage(2)} title="Next"></div>
+          <div
+            className="binder-edge left"
+            onClick={() => changePage(-2)}
+            title="Previous"
+          ></div>
+          <Page
+            id="left-page"
+            pageNumber={leftPage}
+            cards={cards}
+            onSelect={setOverlayUrl}
+          />
+          <Page
+            id="right-page"
+            pageNumber={rightPage}
+            cards={cards}
+            onSelect={setOverlayUrl}
+          />
+          <div
+            className="binder-edge right"
+            onClick={() => changePage(2)}
+            title="Next"
+          ></div>
         </div>
         <div className="page-numbers">
           <span id="left-page-number">{leftPage}</span>
