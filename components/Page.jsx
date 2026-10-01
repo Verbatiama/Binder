@@ -4,23 +4,16 @@ import { getPageImages } from "../lib/cards.js";
 export const SLOTS_PER_PAGE = 9;
 
 export default function Page({ id, pageNumber, cards, onSelect }) {
-  const images = cards
-    ? getPageImages(cards, pageNumber, SLOTS_PER_PAGE)
-    : Array(SLOTS_PER_PAGE).fill(null);
-
-  // Before cards load, slots stay as empty placeholders
-  let placeholder = "";
-  if (cards) placeholder = pageNumber === 0 ? "Blank" : "Error";
+  // Page 0 is the blank inside cover; before cards load, every slot shows a card back
+  const images =
+    cards && pageNumber !== 0
+      ? getPageImages(cards, pageNumber, SLOTS_PER_PAGE)
+      : Array(SLOTS_PER_PAGE).fill(null);
 
   return (
     <div className="page" id={id}>
       {images.map((image, i) => (
-        <CardSlot
-          key={i}
-          image={pageNumber === 0 ? null : image}
-          placeholder={placeholder}
-          onSelect={onSelect}
-        />
+        <CardSlot key={i} image={image} onSelect={onSelect} />
       ))}
     </div>
   );
