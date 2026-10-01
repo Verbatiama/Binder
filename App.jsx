@@ -3,39 +3,67 @@ import Page, { SLOTS_PER_PAGE } from "./components/Page.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
 import { fetchAndMergeCollections, prefetchPageImages } from "./lib/cards.js";
 
+const PORTRAIT_QUERY = "(orientation: portrait)";
+
+function usePortrait() {
+  const [isPortrait, setIsPortrait] = useState(
+    () => window.matchMedia(PORTRAIT_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const query = window.matchMedia(PORTRAIT_QUERY);
+    const onChange = (event) => setIsPortrait(event.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  return isPortrait;
+}
+
 export default function App() {
   const [cards, setCards] = useState(null);
-  const [leftPage, setLeftPage] = useState(0);
+  const [page, setPage] = useState(0);
   const [jumpValue, setJumpValue] = useState("");
   const [overlayUrl, setOverlayUrl] = useState(null);
+  const isPortrait = usePortrait();
+  // Landscape shows a spread starting on an even page; portrait shows one page, skipping the blank inside cover
+  const leftPage = page - (page % 2);
   const rightPage = leftPage + 1;
+  const singlePage = Math.max(page, 1);
+  const displayedPage = isPortrait ? singlePage : Math.max(leftPage, 1);
 
   useEffect(() => {
     fetchAndMergeCollections().then(setCards);
   }, []);
 
   useEffect(() => {
-    setJumpValue(String(Math.max(leftPage, 1)));
-  }, [leftPage]);
+    setJumpValue(String(displayedPage));
+  }, [displayedPage]);
 
-  // Prefetch the previous and next spreads
+  // Prefetch the previous and next page (portrait) or spread (landscape)
   useEffect(() => {
     if (!cards) return;
-    [leftPage - 2, leftPage - 1, leftPage + 2, leftPage + 3].forEach((page) =>
-      prefetchPageImages(cards, page, SLOTS_PER_PAGE),
-    );
-  }, [cards, leftPage]);
+    const pages = isPortrait
+      ? [singlePage - 1, singlePage + 1]
+      : [leftPage - 2, leftPage - 1, leftPage + 2, leftPage + 3];
+    pages.forEach((p) => prefetchPageImages(cards, p, SLOTS_PER_PAGE));
+  }, [cards, isPortrait, singlePage, leftPage]);
 
-  function changePage(delta) {
-    if (leftPage + delta < 0) return;
-    setLeftPage(leftPage + delta);
+  function changePage(direction) {
+    if (isPortrait) {
+      if (singlePage + direction < 1) return;
+      setPage(singlePage + direction);
+    } else {
+      if (leftPage + 2 * direction < 0) return;
+      setPage(leftPage + 2 * direction);
+    }
   }
 
   function jumpToPage(event) {
     event.preventDefault();
-    const page = parseInt(jumpValue, 10);
-    if (isNaN(page) || page < 1) return;
-    setLeftPage(page % 2 == 0 ? page : page - 1);
+    const target = parseInt(jumpValue, 10);
+    if (isNaN(target) || target < 1) return;
+    setPage(target);
   }
 
   return (
@@ -58,29 +86,42 @@ export default function App() {
         <div className="binder">
           <div
             className="binder-edge left"
-            onClick={() => changePage(-2)}
+            onClick={() => changePage(-1)}
             title="Previous"
           ></div>
-          <Page
-            id="left-page"
-            pageNumber={leftPage}
-            cards={cards}
-            onSelect={setOverlayUrl}
-          />
-          <Page
-            id="right-page"
-            pageNumber={rightPage}
-            cards={cards}
-            onSelect={setOverlayUrl}
-          />
+          {isPortrait ? (
+            <Page
+              id="single-page"
+              pageNumber={singlePage}
+              cards={cards}
+              onSelect={setOverlayUrl}
+            />
+          ) : (
+            <>
+              <Page
+                id="left-page"
+                pageNumber={leftPage}
+                cards={cards}
+                onSelect={setOverlayUrl}
+              />
+              <Page
+                id="right-page"
+                pageNumber={rightPage}
+                cards={cards}
+                onSelect={setOverlayUrl}
+              />
+            </>
+          )}
           <div
             className="binder-edge right"
-            onClick={() => changePage(2)}
+            onClick={() => changePage(1)}
             title="Next"
           ></div>
         </div>
         <div className="page-numbers">
-          <span id="left-page-number">{leftPage}</span>
+          <span id="left-page-number">
+            {isPortrait ? singlePage : leftPage}
+          </span>
           <form className="jump-to-page" onSubmit={jumpToPage}>
             <label htmlFor="jump-page-input">Jump to page:</label>
             <input
@@ -92,7 +133,7 @@ export default function App() {
             />
             <button type="submit">Go</button>
           </form>
-          <span id="right-page-number">{rightPage}</span>
+          {!isPortrait && <span id="right-page-number">{rightPage}</span>}
         </div>
       </div>
       <CardOverlay imageUrl={overlayUrl} onClose={() => setOverlayUrl(null)} />

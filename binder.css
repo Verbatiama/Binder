@@ -105,3 +105,16 @@ body {
     width: 60px;
     margin-right: 8px;
 }
+@media (orientation: portrait) {
+    .binder {
+        padding: 24px 32px;
+    }
+
+    .page {
+        gap: 1vw;
+        padding: 2vw;
+        border-radius: 2vw;
+        width: min(80vw, 56vh);
+        height: min(80vh, 112vw);
+    }
+}
