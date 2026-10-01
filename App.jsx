@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Page, { SLOTS_PER_PAGE } from "./components/Page.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
 import { fetchAndMergeCollections, prefetchPageImages } from "./lib/cards.js";
 
 const PORTRAIT_QUERY = "(orientation: portrait)";
+// Minimum horizontal distance (px) for a touch to count as a page-turn swipe
+const SWIPE_THRESHOLD = 50;
 
 function usePortrait() {
   const [isPortrait, setIsPortrait] = useState(
@@ -26,6 +28,7 @@ export default function App() {
   const [jumpValue, setJumpValue] = useState("");
   const [overlayUrl, setOverlayUrl] = useState(null);
   const isPortrait = usePortrait();
+  const touchStart = useRef(null);
   // Landscape shows a spread starting on an even page; portrait shows one page, skipping the blank inside cover
   const leftPage = page - (page % 2);
   const rightPage = leftPage + 1;
@@ -59,6 +62,28 @@ export default function App() {
     }
   }
 
+  function onTouchStart(event) {
+    if (event.touches.length !== 1) {
+      touchStart.current = null;
+      return;
+    }
+    const touch = event.touches[0];
+    touchStart.current = { x: touch.clientX, y: touch.clientY };
+  }
+
+  function onTouchEnd(event) {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    // Ignore short or mostly vertical gestures so scrolling still works
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
+    // Swiping left reveals the next page, like turning a real page
+    changePage(dx < 0 ? 1 : -1);
+  }
+
   function jumpToPage(event) {
     event.preventDefault();
     const target = parseInt(jumpValue, 10);
@@ -83,7 +108,12 @@ export default function App() {
         &larr; Adam Henderson
       </a>
       <div className="binder-container">
-        <div className="binder">
+        <div
+          className="binder"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onTouchCancel={() => (touchStart.current = null)}
+        >
           <div
             className="binder-edge left"
             onClick={() => changePage(-1)}
