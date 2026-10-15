@@ -19,7 +19,7 @@ export default function CardSlot({ image, onSelect }) {
             filter: image.owned === 0 ? "grayscale(100%) brightness(0.6)" : undefined,
           }}
           onLoad={() => setLoadedUrl(image.url)}
-          onClick={() => onSelect(image.url)}
+          onClick={() => onSelect(image.displayUrl)}
         />
       )}
     </div>
