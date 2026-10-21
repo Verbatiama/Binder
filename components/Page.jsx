@@ -1,7 +1,7 @@
 import CardSlot from "./CardSlot.jsx";
-import { getPageImages } from "../lib/cards.js";
+import { getPageImages, SLOTS_PER_PAGE } from "../lib/cards.js";
 
-export const SLOTS_PER_PAGE = 9;
+export { SLOTS_PER_PAGE };
 
 export default function Page({ id, pageNumber, cards, onSelect }) {
   // Page 0 is the blank inside cover; before cards load, every slot shows a card back

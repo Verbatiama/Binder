@@ -11,12 +11,14 @@ A virtual card binder for a Magic: The Gathering legendary creature collection. 
 
 ## Data sources
 
-- Collection and card lists: [LegendaryCreatureCollectionStorage](https://github.com/Verbatiama/LegendaryCreatureCollectionStorage) (`collection.json`, `FullCards.json`)
+- Collection and card lists: Supabase (`cards`, `card_ownership` and `binder_slots` tables). `binder_slots` sets the book, page and slot of each card.
 - Card images: a Scryfall image cache at `fanable.verbatiam.dev`
 
 ## Development
 
 Requires Node 26 (see `.nvmrc`).
+
+Copy `.env.example` to `.env` and fill in the Supabase project URL and publishable key. The deploy workflow reads the same names from the repository's Actions variables.
 
 ```sh
 npm install
