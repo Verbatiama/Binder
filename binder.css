@@ -179,3 +179,114 @@ body {
         letter-spacing: 1px;
     }
 }
+
+.edit-button {
+    position: fixed;
+    top: 4px;
+    right: 12px;
+    z-index: 10;
+    font: 14px system-ui, sans-serif;
+    color: #fff;
+    background: #555;
+    border: 1px solid #888;
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+}
+
+.edit-button.active {
+    background: #c2410c;
+    border-color: #c2410c;
+}
+
+.binder-container.editing .binder {
+    box-shadow: 0 0 0 3px #c2410c, 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.card-slot.selected {
+    border: 3px solid #c2410c;
+}
+
+.picker-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.picker {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: min(960px, 100%);
+    max-height: 100%;
+    padding: 16px;
+    background: #333;
+    border-radius: 12px;
+}
+
+.picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.picker-header h2 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.picker-header button {
+    margin-left: 8px;
+}
+
+.picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.printing {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+    color: #fff;
+    font-size: 0.8em;
+    background: none;
+    border: 3px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.printing img {
+    width: 100%;
+    aspect-ratio: 488 / 680;
+    border-radius: 6px;
+}
+
+.printing:hover {
+    border-color: #888;
+}
+
+.printing.selected {
+    border-color: #c2410c;
+}
+
+.sql-output {
+    width: 100%;
+    min-height: 60vh;
+    font: 13px ui-monospace, monospace;
+    color: #eee;
+    background: #222;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 8px;
+    resize: none;
+}

@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Page, { SLOTS_PER_PAGE } from "./components/Page.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
+import PrintingPicker from "./components/PrintingPicker.jsx";
+import SqlOverlay from "./components/SqlOverlay.jsx";
 import { fetchAndMergeCollections, prefetchPageImages } from "./lib/cards.js";
+import { buildOwnershipSql } from "./lib/ownership.js";
 
 const PORTRAIT_QUERY = "(orientation: portrait)";
 // Minimum horizontal distance (px) for a touch to count as a page-turn swipe
@@ -27,6 +30,11 @@ export default function App() {
   const [page, setPage] = useState(0);
   const [jumpValue, setJumpValue] = useState("");
   const [overlayUrl, setOverlayUrl] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  // Slot card id -> { name, printing } for each printing chosen in edit mode
+  const [selections, setSelections] = useState(new Map());
+  const [editingCard, setEditingCard] = useState(null);
+  const [sql, setSql] = useState(null);
   const isPortrait = usePortrait();
   const touchStart = useRef(null);
   // Landscape shows a spread starting on an even page; portrait shows one page, skipping the blank inside cover
@@ -84,6 +92,26 @@ export default function App() {
     changePage(dx < 0 ? 1 : -1);
   }
 
+  function selectCard(image) {
+    if (editMode) setEditingCard(image);
+    else setOverlayUrl(image.displayUrl);
+  }
+
+  function pickPrinting(printing) {
+    const card = editingCard;
+    setSelections((prev) => new Map(prev).set(card.id, { name: card.name, printing }));
+    setEditingCard(null);
+  }
+
+  // Leaving edit mode turns the chosen printings into SQL
+  function toggleEditMode() {
+    if (editMode && selections.size > 0) {
+      setSql(buildOwnershipSql(selections));
+      setSelections(new Map());
+    }
+    setEditMode(!editMode);
+  }
+
   function jumpToPage(event) {
     event.preventDefault();
     const target = parseInt(jumpValue, 10);
@@ -107,7 +135,13 @@ export default function App() {
       >
         &larr; Adam Henderson
       </a>
-      <div className="binder-container">
+      <button
+        className={`edit-button${editMode ? " active" : ""}`}
+        onClick={toggleEditMode}
+      >
+        {editMode ? `Done (${selections.size})` : "Edit"}
+      </button>
+      <div className={`binder-container${editMode ? " editing" : ""}`}>
         <div
           className="binder"
           onTouchStart={onTouchStart}
@@ -124,7 +158,8 @@ export default function App() {
               id="single-page"
               pageNumber={singlePage}
               cards={cards}
-              onSelect={setOverlayUrl}
+              selections={selections}
+              onSelect={selectCard}
             />
           ) : (
             <>
@@ -132,13 +167,15 @@ export default function App() {
                 id="left-page"
                 pageNumber={leftPage}
                 cards={cards}
-                onSelect={setOverlayUrl}
+                selections={selections}
+              onSelect={selectCard}
               />
               <Page
                 id="right-page"
                 pageNumber={rightPage}
                 cards={cards}
-                onSelect={setOverlayUrl}
+                selections={selections}
+              onSelect={selectCard}
               />
             </>
           )}
@@ -167,6 +204,15 @@ export default function App() {
         </div>
       </div>
       <CardOverlay imageUrl={overlayUrl} onClose={() => setOverlayUrl(null)} />
+      {editingCard && (
+        <PrintingPicker
+          card={editingCard}
+          selectedId={selections.get(editingCard.id)?.printing.id}
+          onPick={pickPrinting}
+          onClose={() => setEditingCard(null)}
+        />
+      )}
+      <SqlOverlay sql={sql} onClose={() => setSql(null)} />
     </>
   );
 }
