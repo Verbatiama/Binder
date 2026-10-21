@@ -39,12 +39,12 @@ Every push to `main` builds the site and deploys it to GitHub Pages via [.github
 2. ~~Commit the JSON file to this repo~~
 3. ~~Fetch the JSON data onto the page~~
 4. ~~Render the JSON as a table~~
-6. Convert JSON file to CosmoDB
-7. Replace API call to point to CosmoDB
-8. Convert PowerShell script to an Azure funtion
-9. Create an Azure function to update owned cards
-10. Allow updates via Javascript on page
-11. ~~Visualise folder~~
+5. ~~Convert JSON file to Supabase postgres~~
+6. ~~Replace API call to point to Supabase postgres~~
+7. Convert PowerShell script to an Azure funtion
+8. Create an Azure function to update owned cards
+9. Allow updates via Javascript on page
+10. ~~Visualise folder~~
     - ~~Lookup card images~~
     - ~~Arrange into grid, navigate via book and page~~
     - Click on the image to set owned
