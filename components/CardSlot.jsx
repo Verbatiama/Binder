@@ -8,7 +8,8 @@ export default function CardSlot({ image, onSelect }) {
 
   return (
     <div className="card-slot">
-      <img src={cardBack} alt="Card back" className="card-back" />
+      {/* Keyed by url so its delayed fade-in restarts for each new image */}
+      <img key={image?.url} src={cardBack} alt="Card back" className="card-back" />
       {image && (
         <img
           src={image.url}

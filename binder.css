@@ -111,6 +111,16 @@ body {
     height: 100%;
 }
 
+/* Wait briefly before showing the card back so fast-loading images don't flicker */
+.card-back {
+    animation: card-back-fade-in 0.2s 150ms both;
+}
+
+@keyframes card-back-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 .card-image {
     cursor: pointer;
     transition: opacity 0.2s;
