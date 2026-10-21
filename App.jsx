@@ -31,7 +31,7 @@ export default function App() {
   const [jumpValue, setJumpValue] = useState("");
   const [overlayUrl, setOverlayUrl] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  // Slot card id -> { name, printing } for each printing chosen in edit mode
+  // Slot card id -> { name, printing, foiling } for each printing chosen in edit mode
   const [selections, setSelections] = useState(new Map());
   const [editingCard, setEditingCard] = useState(null);
   const [sql, setSql] = useState(null);
@@ -97,9 +97,9 @@ export default function App() {
     else setOverlayUrl(image.displayUrl);
   }
 
-  function pickPrinting(printing) {
+  function pickPrinting(printing, foiling) {
     const card = editingCard;
-    setSelections((prev) => new Map(prev).set(card.id, { name: card.name, printing }));
+    setSelections((prev) => new Map(prev).set(card.id, { name: card.name, printing, foiling }));
     setEditingCard(null);
   }
 
@@ -207,7 +207,7 @@ export default function App() {
       {editingCard && (
         <PrintingPicker
           card={editingCard}
-          selectedId={selections.get(editingCard.id)?.printing.id}
+          selection={selections.get(editingCard.id)}
           onPick={pickPrinting}
           onClose={() => setEditingCard(null)}
         />

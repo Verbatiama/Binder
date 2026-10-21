@@ -290,3 +290,43 @@ body {
     padding: 8px;
     resize: none;
 }
+
+.finish-selector {
+    display: flex;
+    margin-left: auto;
+}
+
+.finish-selector button {
+    color: #fff;
+    background: #555;
+    border: 1px solid #888;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+.finish-selector button:first-child {
+    border-radius: 6px 0 0 6px;
+}
+
+.finish-selector button:last-child {
+    border-radius: 0 6px 6px 0;
+}
+
+.finish-selector button.active {
+    background: #c2410c;
+    border-color: #c2410c;
+}
+
+.finish-selector button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.printing:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.printing:disabled:hover {
+    border-color: transparent;
+}

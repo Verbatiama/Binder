@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
 import { fetchPrintings } from "../lib/cards.js";
 
-export default function PrintingPicker({ card, selectedId, onPick, onClose }) {
+const FINISHES = [
+  { value: "nonfoil", label: "Nonfoil" },
+  { value: "foil", label: "Foil" },
+  { value: "etched", label: "Etched" },
+];
+
+export default function PrintingPicker({ card, selection, onPick, onClose }) {
   const [printings, setPrintings] = useState(null);
   const [error, setError] = useState(null);
+  const [finish, setFinish] = useState(selection?.foiling ?? "nonfoil");
 
   useEffect(() => {
     let cancelled = false;
@@ -15,11 +22,30 @@ export default function PrintingPicker({ card, selectedId, onPick, onClose }) {
     };
   }, [card.name]);
 
+  // Finishes at least one printing comes in; fall back to the first of those if the chosen one isn't
+  const available = new Set(printings?.flatMap((printing) => printing.finishes));
+  const activeFinish =
+    !printings || available.has(finish)
+      ? finish
+      : FINISHES.find(({ value }) => available.has(value))?.value;
+
   return (
     <div className="picker-overlay" onClick={onClose}>
       <div className="picker" onClick={(e) => e.stopPropagation()}>
         <div className="picker-header">
           <h2>{card.name}</h2>
+          <div className="finish-selector">
+            {FINISHES.map(({ value, label }) => (
+              <button
+                key={value}
+                className={value === activeFinish ? "active" : undefined}
+                disabled={!printings || !available.has(value)}
+                onClick={() => setFinish(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <button onClick={onClose}>Close</button>
         </div>
         {error && <p>{error}</p>}
@@ -28,8 +54,13 @@ export default function PrintingPicker({ card, selectedId, onPick, onClose }) {
           {printings?.map((printing) => (
             <button
               key={printing.id}
-              className={`printing${printing.id === selectedId ? " selected" : ""}`}
-              onClick={() => onPick(printing)}
+              className={`printing${
+                printing.id === selection?.printing.id && activeFinish === selection.foiling
+                  ? " selected"
+                  : ""
+              }`}
+              disabled={!printing.finishes.includes(activeFinish)}
+              onClick={() => onPick(printing, activeFinish)}
             >
               {printing.image && (
                 <img
