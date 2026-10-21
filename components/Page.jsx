@@ -3,7 +3,7 @@ import { getPageImages, SLOTS_PER_PAGE } from "../lib/cards.js";
 
 export { SLOTS_PER_PAGE };
 
-export default function Page({ id, pageNumber, cards, selections, onSelect }) {
+export default function Page({ id, pageNumber, cards, selections, editMode, onSelect }) {
   // Page 0 is the blank inside cover; before cards load, every slot shows a card back
   const images =
     cards && pageNumber !== 0
@@ -17,6 +17,7 @@ export default function Page({ id, pageNumber, cards, selections, onSelect }) {
           key={i}
           image={image}
           selected={image && selections.has(image.id)}
+          editMode={editMode}
           onSelect={onSelect}
         />
       ))}

@@ -330,3 +330,22 @@ body {
 .printing:disabled:hover {
     border-color: transparent;
 }
+
+.specific-check {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    background: #16a34a;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}

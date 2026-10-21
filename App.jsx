@@ -159,6 +159,7 @@ export default function App() {
               pageNumber={singlePage}
               cards={cards}
               selections={selections}
+              editMode={editMode}
               onSelect={selectCard}
             />
           ) : (
@@ -168,6 +169,7 @@ export default function App() {
                 pageNumber={leftPage}
                 cards={cards}
                 selections={selections}
+              editMode={editMode}
               onSelect={selectCard}
               />
               <Page
@@ -175,6 +177,7 @@ export default function App() {
                 pageNumber={rightPage}
                 cards={cards}
                 selections={selections}
+              editMode={editMode}
               onSelect={selectCard}
               />
             </>
