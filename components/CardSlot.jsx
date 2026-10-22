@@ -24,7 +24,10 @@ export default function CardSlot({ image, selected, editMode, onSelect }) {
         />
       )}
       {loaded && image.finish !== "nonfoil" && (
-        <span className={`foil-overlay ${image.finish}`} aria-hidden="true" />
+        <span className={`finish ${image.finish}`} aria-hidden="true">
+          <span className="finish-shine" />
+          <span className="finish-glare" />
+        </span>
       )}
       {/* In edit mode, mark cards whose owned printing is already recorded */}
       {editMode && image?.isSpecific && (

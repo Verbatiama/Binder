@@ -29,7 +29,7 @@ export default function App() {
   const [cards, setCards] = useState(null);
   const [page, setPage] = useState(0);
   const [jumpValue, setJumpValue] = useState("");
-  const [overlayUrl, setOverlayUrl] = useState(null);
+  const [overlayImage, setOverlayImage] = useState(null);
   const [editMode, setEditMode] = useState(false);
   // Slot card id -> { name, printing, foiling } for each printing chosen in edit mode
   const [selections, setSelections] = useState(new Map());
@@ -94,7 +94,7 @@ export default function App() {
 
   function selectCard(image) {
     if (editMode) setEditingCard(image);
-    else setOverlayUrl(image.displayUrl);
+    else setOverlayImage(image);
   }
 
   function pickPrinting(printing, foiling) {
@@ -206,7 +206,7 @@ export default function App() {
           {!isPortrait && <span id="right-page-number">{rightPage}</span>}
         </div>
       </div>
-      <CardOverlay imageUrl={overlayUrl} onClose={() => setOverlayUrl(null)} />
+      <CardOverlay image={overlayImage} onClose={() => setOverlayImage(null)} />
       {editingCard && (
         <PrintingPicker
           card={editingCard}

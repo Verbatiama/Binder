@@ -1,398 +1,621 @@
 /* Space reserved around the binder so everything fits in the viewport */
 :root {
-    --top-gutter: 36px;
-    --side-gutter: 16px;
-    --binder-pad-x: 40px;
-    --binder-pad-y: 40px;
-    --binder-gap: 40px;
-    --page-numbers-height: 48px;
-    --chrome-y: calc(var(--top-gutter) + var(--side-gutter) + 2 * var(--binder-pad-y) + var(--page-numbers-height));
-    --chrome-x: calc(2 * var(--side-gutter) + 2 * var(--binder-pad-x));
+  --top-gutter: 36px;
+  --side-gutter: 16px;
+  --binder-pad-x: 40px;
+  --binder-pad-y: 40px;
+  --binder-gap: 40px;
+  --page-numbers-height: 48px;
+  --chrome-y: calc(
+    var(--top-gutter) + var(--side-gutter) + 2 * var(--binder-pad-y) +
+      var(--page-numbers-height)
+  );
+  --chrome-x: calc(2 * var(--side-gutter) + 2 * var(--binder-pad-x));
 }
 
 *,
 *::before,
 *::after {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
 body {
-    margin: 0;
-    height: 100%;
-    overflow: hidden;
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-    background: #2e2e2e;
-    color: #fff;
-    font-family: Arial, sans-serif;
+  background: #2e2e2e;
+  color: #fff;
+  font-family: Arial, sans-serif;
 }
 
 #root {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    padding: var(--top-gutter) var(--side-gutter) var(--side-gutter);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--top-gutter) var(--side-gutter) var(--side-gutter);
 }
 
 .binder-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 100%;
-    max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .binder {
-    display: flex;
-    gap: var(--binder-gap);
-    background: #444;
-    padding: var(--binder-pad-y) var(--binder-pad-x);
-    border-radius: 20px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-    position: relative;
+  display: flex;
+  gap: var(--binder-gap);
+  background: #444;
+  padding: var(--binder-pad-y) var(--binder-pad-x);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  position: relative;
 }
 
 .binder-edge {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: var(--binder-pad-x);
-    cursor: pointer;
-    z-index: 2;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--binder-pad-x);
+  cursor: pointer;
+  z-index: 2;
 }
 
 .binder-edge.left {
-    left: 0;
+  left: 0;
 }
 
 .binder-edge.right {
-    right: 0;
+  right: 0;
 }
 
 .binder-edge:hover {
-    background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .page {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 0.5vw;
-    background: #222;
-    padding: 1vw;
-    border-radius: 1vw;
-    width: min(30vw, (100vw - var(--chrome-x) - var(--binder-gap)) / 2);
-    height: min(80vh, 100dvh - var(--chrome-y));
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 0.5vw;
+  background: #222;
+  padding: 1vw;
+  border-radius: 1vw;
+  width: min(30vw, (100vw - var(--chrome-x) - var(--binder-gap)) / 2);
+  height: min(80vh, 100dvh - var(--chrome-y));
 }
 
 .card-slot {
-    background: #555;
-    border: 2px dashed #888;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    position: relative;
+  background: #555;
+  border: 2px dashed #888;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
 }
 
 .card-back,
 .card-image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* Wait briefly before showing the card back so fast-loading images don't flicker */
 .card-back {
-    animation: card-back-fade-in 0.2s 150ms both;
+  animation: card-back-fade-in 0.2s 150ms both;
 }
 
 @keyframes card-back-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .card-image {
-    cursor: pointer;
-    transition: opacity 0.2s;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
 
 .page-numbers {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    height: var(--page-numbers-height);
-    align-items: flex-end;
-    font-size: 1.2em;
-    letter-spacing: 2px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: var(--page-numbers-height);
+  align-items: flex-end;
+  font-size: 1.2em;
+  letter-spacing: 2px;
 }
 
 .jump-to-page {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .jump-to-page label {
-    margin-right: 8px;
+  margin-right: 8px;
 }
 
 .jump-to-page input {
-    width: 60px;
-    margin-right: 8px;
+  width: 60px;
+  margin-right: 8px;
 }
 @media (orientation: portrait) {
-    :root {
-        --binder-pad-x: 32px;
-        --binder-pad-y: 24px;
-    }
+  :root {
+    --binder-pad-x: 32px;
+    --binder-pad-y: 24px;
+  }
 
-    .page {
-        gap: 1vw;
-        padding: 2vw;
-        border-radius: 2vw;
-        width: min(80vw, 56vh, 100vw - var(--chrome-x));
-        height: min(80vh, 112vw, 100dvh - var(--chrome-y));
-    }
+  .page {
+    gap: 1vw;
+    padding: 2vw;
+    border-radius: 2vw;
+    width: min(80vw, 56vh, 100vw - var(--chrome-x));
+    height: min(80vh, 112vw, 100dvh - var(--chrome-y));
+  }
 }
 
 @media (max-width: 480px), (max-height: 480px) {
-    :root {
-        --top-gutter: 32px;
-        --side-gutter: 8px;
-        --binder-pad-x: 20px;
-        --binder-pad-y: 12px;
-        --binder-gap: 16px;
-        --page-numbers-height: 40px;
-    }
+  :root {
+    --top-gutter: 32px;
+    --side-gutter: 8px;
+    --binder-pad-x: 20px;
+    --binder-pad-y: 12px;
+    --binder-gap: 16px;
+    --page-numbers-height: 40px;
+  }
 
-    .page-numbers {
-        font-size: 1em;
-        letter-spacing: 1px;
-    }
+  .page-numbers {
+    font-size: 1em;
+    letter-spacing: 1px;
+  }
 }
 
 .edit-button {
-    position: fixed;
-    top: 4px;
-    right: 12px;
-    z-index: 10;
-    font: 14px system-ui, sans-serif;
-    color: #fff;
-    background: #555;
-    border: 1px solid #888;
-    border-radius: 6px;
-    padding: 4px 12px;
-    cursor: pointer;
+  position: fixed;
+  top: 4px;
+  right: 12px;
+  z-index: 10;
+  font:
+    14px system-ui,
+    sans-serif;
+  color: #fff;
+  background: #555;
+  border: 1px solid #888;
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
 }
 
 .edit-button.active {
-    background: #c2410c;
-    border-color: #c2410c;
+  background: #c2410c;
+  border-color: #c2410c;
 }
 
 .binder-container.editing .binder {
-    box-shadow: 0 0 0 3px #c2410c, 0 4px 24px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 0 3px #c2410c,
+    0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .card-slot.selected {
-    border: 3px solid #c2410c;
+  border: 3px solid #c2410c;
 }
 
 .picker-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.85);
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.85);
 }
 
 .picker {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: min(960px, 100%);
-    max-height: 100%;
-    padding: 16px;
-    background: #333;
-    border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(960px, 100%);
+  max-height: 100%;
+  padding: 16px;
+  background: #333;
+  border-radius: 12px;
 }
 
 .picker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
 .picker-header h2 {
-    margin: 0;
-    font-size: 1.2em;
+  margin: 0;
+  font-size: 1.2em;
 }
 
 .picker-header button {
-    margin-left: 8px;
+  margin-left: 8px;
 }
 
 .picker-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
-    overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  overflow-y: auto;
 }
 
 .printing {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 4px;
-    color: #fff;
-    font-size: 0.8em;
-    background: none;
-    border: 3px solid transparent;
-    border-radius: 8px;
-    cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  color: #fff;
+  font-size: 0.8em;
+  background: none;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .printing img {
-    width: 100%;
-    aspect-ratio: 488 / 680;
-    border-radius: 6px;
+  width: 100%;
+  aspect-ratio: 488 / 680;
+  border-radius: 6px;
 }
 
 .printing:hover {
-    border-color: #888;
+  border-color: #888;
 }
 
 .printing.selected {
-    border-color: #c2410c;
+  border-color: #c2410c;
 }
 
 .sql-output {
-    width: 100%;
-    min-height: 60vh;
-    font: 13px ui-monospace, monospace;
-    color: #eee;
-    background: #222;
-    border: 1px solid #555;
-    border-radius: 6px;
-    padding: 8px;
-    resize: none;
+  width: 100%;
+  min-height: 60vh;
+  font:
+    13px ui-monospace,
+    monospace;
+  color: #eee;
+  background: #222;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 8px;
+  resize: none;
 }
 
 .finish-selector {
-    display: flex;
-    margin-left: auto;
+  display: flex;
+  margin-left: auto;
 }
 
 .finish-selector button {
-    color: #fff;
-    background: #555;
-    border: 1px solid #888;
-    padding: 4px 10px;
-    cursor: pointer;
+  color: #fff;
+  background: #555;
+  border: 1px solid #888;
+  padding: 4px 10px;
+  cursor: pointer;
 }
 
 .finish-selector button:first-child {
-    border-radius: 6px 0 0 6px;
+  border-radius: 6px 0 0 6px;
 }
 
 .finish-selector button:last-child {
-    border-radius: 0 6px 6px 0;
+  border-radius: 0 6px 6px 0;
 }
 
 .finish-selector button.active {
-    background: #c2410c;
-    border-color: #c2410c;
+  background: #c2410c;
+  border-color: #c2410c;
 }
 
 .finish-selector button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .printing:disabled {
-    opacity: 0.25;
-    cursor: not-allowed;
+  opacity: 0.25;
+  cursor: not-allowed;
 }
 
 .printing:disabled:hover {
-    border-color: transparent;
+  border-color: transparent;
 }
 
 .specific-check {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 22px;
-    height: 22px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #fff;
-    background: #16a34a;
-    border-radius: 50%;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-    pointer-events: none;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  background: #16a34a;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
-/* Finish overlays: blended over the art at low strength so the card stays readable */
-.foil-overlay {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-repeat: no-repeat;
+@property --light-x {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
 }
 
-/* Foil: a soft rainbow sheen that drifts across the card */
-.foil-overlay.foil {
-    background-image:
-        linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.5) 50%, transparent 65%),
-        linear-gradient(125deg, #ff6b6b, #ffd166, #6bff95, #4dd8ff, #b18cff, #ff6bd6, #ff6b6b);
-    background-size: 250% 250%, 300% 300%;
-    mix-blend-mode: color-dodge;
-    opacity: 0.22;
-    animation: foil-drift 8s ease-in-out infinite alternate;
+@property --light-y {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
 }
 
-@keyframes foil-drift {
-    from { background-position: 100% 100%, 0% 0%; }
-    to { background-position: 0% 0%, 100% 100%; }
+/* Keep the blend modes inside the slot so they only mix with the card art */
+.card-slot {
+  isolation: isolate;
 }
 
-/* Etched: brushed silver with a sharp glint, colourless so it reads as metal rather than rainbow */
-.foil-overlay.etched {
-    background-image:
-        linear-gradient(100deg, transparent 44%, rgba(255, 255, 255, 0.9) 50%, transparent 56%),
-        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.18) 0 1px, rgba(0, 0, 0, 0.12) 1px 2px),
-        linear-gradient(160deg, #f4f4f4, #8a8f96 30%, #e6e8eb 50%, #6f747b 70%, #d9dcdf);
-    background-size: 300% 100%, 100% 100%, 100% 100%;
-    mix-blend-mode: overlay;
-    opacity: 0.4;
-    animation: etched-glint 5s ease-in-out infinite;
+/* Offset neighbouring cards so a page of foils doesn't shimmer in lockstep */
+.card-slot:nth-child(3n + 2) {
+  --finish-delay: -4s;
+}
+.card-slot:nth-child(3n) {
+  --finish-delay: -8s;
 }
 
-@keyframes etched-glint {
-    0%, 20% { background-position: 150% 0, 0 0, 0 0; }
-    80%, 100% { background-position: -50% 0, 0 0, 0 0; }
+.finish {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: light-path 12s ease-in-out infinite;
+  animation-delay: var(--finish-delay, 0s);
+  /* Light position mapped into the narrower range the gradients move through */
+  --bg-x: calc(37% + var(--light-x) * 0.26);
+  --bg-y: calc(33% + var(--light-y) * 0.34);
+}
+
+@keyframes light-path {
+  0%,
+  100% {
+    --light-x: 20%;
+    --light-y: 15%;
+  }
+  25% {
+    --light-x: 80%;
+    --light-y: 30%;
+  }
+  50% {
+    --light-x: 70%;
+    --light-y: 85%;
+  }
+  75% {
+    --light-x: 25%;
+    --light-y: 70%;
+  }
+}
+
+.finish-shine,
+.finish-glare,
+.finish-shine::before,
+.finish-shine::after {
+  position: absolute;
+  inset: 0;
+}
+
+.finish-shine::before,
+.finish-shine::after {
+  content: "";
+}
+
+/* Foil: holofoil rare - rainbow bands over fine scanlines, crossed by moving bars of light */
+.finish.foil .finish-shine {
+  background-image:
+    repeating-linear-gradient(
+      110deg,
+      hsl(283, 49%, 60%),
+      hsl(217, 100%, 61%),
+      hsl(149, 72%, 52%),
+      hsl(51, 100%, 58%),
+      hsl(2, 80%, 63%),
+      hsl(283, 49%, 60%),
+      hsl(217, 100%, 61%),
+      hsl(149, 72%, 52%),
+      hsl(51, 100%, 58%),
+      hsl(2, 80%, 63%)
+    ),
+    repeating-linear-gradient(90deg, #000 0 1px, #666 1px 2px);
+  background-size:
+    400% 400%,
+    auto;
+  background-position:
+    calc((50% - var(--light-x)) * 2.6 + 50%)
+      calc((50% - var(--light-y)) * 3.5 + 50%),
+    0 0;
+  background-blend-mode: overlay;
+  filter: brightness(0.9) contrast(1.4) saturate(1.1);
+  mix-blend-mode: color-dodge;
+  opacity: 0.65;
+}
+
+.finish.foil .finish-shine::before {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      #000 6%,
+      #b3b3b3 9%,
+      #000 10.5%,
+      #b3b3b3 12%,
+      #000 15%,
+      #000 42%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #000 6%,
+      #b3b3b3 9%,
+      #000 10.5%,
+      #b3b3b3 12%,
+      #000 15%,
+      #000 30%
+    );
+  background-size: 200% 200%;
+  background-position:
+    calc((50% - var(--light-x)) * 1.6 + 50% + var(--light-y) * 0.5)
+      var(--light-x),
+    calc((50% - var(--light-x)) * -0.9 + 50% - var(--light-y) * 0.75)
+      var(--light-y);
+  background-blend-mode: screen;
+  filter: brightness(1.15) contrast(1.1);
+  mix-blend-mode: hard-light;
+}
+
+/* Spotlight that brightens the holo around the light position */
+.finish.foil .finish-shine::after {
+  background-image: radial-gradient(
+    farthest-corner circle at var(--light-x) var(--light-y),
+    hsla(0, 0%, 90%, 0.8) 0%,
+    hsla(0, 0%, 78%, 0.1) 25%,
+    #000 90%
+  );
+  filter: brightness(0.6) contrast(4);
+  mix-blend-mode: luminosity;
+}
+
+.finish.etched .finish-shine {
+  --band: 6%;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      hsl(0, 0%, 60%) 0 1px,
+      hsl(0, 0%, 20%) 1px 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      hsl(0, 0%, 60%) 0 1px,
+      hsl(0, 0%, 20%) 1px 4px
+    ),
+    repeating-linear-gradient(
+      -33deg,
+      hsl(2, 70%, 47%) calc(var(--band) * 1),
+      hsl(228, 60%, 64%) calc(var(--band) * 2),
+      hsl(176, 55%, 39%) calc(var(--band) * 3),
+      hsl(123, 68%, 35%) calc(var(--band) * 4),
+      hsl(283, 75%, 57%) calc(var(--band) * 5),
+      hsl(2, 70%, 47%) calc(var(--band) * 6)
+    ),
+    repeating-linear-gradient(
+      133deg,
+      hsla(227, 53%, 12%, 0.5) 0%,
+      hsl(180, 10%, 50%) 2.5%,
+      hsl(83, 50%, 35%) 5%,
+      hsl(180, 10%, 50%) 7.5%,
+      hsla(227, 53%, 12%, 0.5) 10%,
+      hsla(227, 53%, 12%, 0.5) 15%
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--light-x) var(--light-y),
+      hsla(189, 76%, 77%, 0.6) 0%,
+      hsla(147, 59%, 77%, 0.6) 25%,
+      hsla(271, 55%, 69%, 0.6) 50%,
+      hsla(355, 56%, 72%, 0.6) 75%
+    );
+  background-size:
+    auto,
+    auto,
+    1100% 1100%,
+    600% 600%,
+    200% 200%;
+  background-position:
+    0 0,
+    0 0,
+    var(--bg-x) var(--bg-y),
+    var(--bg-x) var(--bg-y),
+    var(--bg-x) var(--bg-y);
+  background-blend-mode: difference, difference, luminosity, soft-light, normal;
+  filter: brightness(0.95) contrast(2);
+  mix-blend-mode: color-dodge;
+  opacity: 0.85;
+}
+
+/* Bright metallic streaks that catch the light as it passes */
+.finish.etched .finish-shine::after {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      hsl(228, 100%, 74%) calc(var(--band) * 1),
+      hsl(283, 100%, 73%) calc(var(--band) * 2),
+      hsl(2, 100%, 73%) calc(var(--band) * 3),
+      hsl(53, 100%, 69%) calc(var(--band) * 4),
+      hsl(93, 100%, 69%) calc(var(--band) * 5),
+      hsl(176, 100%, 76%) calc(var(--band) * 6),
+      hsl(228, 100%, 74%) calc(var(--band) * 7)
+    ),
+    repeating-linear-gradient(
+      133deg,
+      #0e152e 0%,
+      hsl(180, 10%, 60%) 3.8%,
+      hsl(180, 29%, 66%) 4.5%,
+      hsl(180, 10%, 60%) 5.2%,
+      #0e152e 10%,
+      #0e152e 12%
+    );
+  background-size:
+    200% 700%,
+    300% 100%;
+  background-position:
+    0% var(--bg-y),
+    var(--bg-x) var(--bg-y);
+  background-blend-mode: hue, hard-light;
+  filter: saturate(1.5);
+  mix-blend-mode: lighten;
+  opacity: 0.6;
+}
+
+/* Glare fades to transparent rather than black so it never darkens the art */
+.finish-glare {
+  background-image: radial-gradient(
+    farthest-corner circle at var(--light-x) var(--light-y),
+    hsla(180, 100%, 95%, 0.9) 0%,
+    hsla(0, 0%, 100%, 0.25) 35%,
+    transparent 70%
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+}
+
+.finish.etched .finish-glare {
+  mix-blend-mode: soft-light;
+  opacity: 0.6;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .foil-overlay {
-        animation: none;
-    }
+  .finish {
+    animation: none;
+    --light-x: 30%;
+    --light-y: 25%;
+  }
 }
