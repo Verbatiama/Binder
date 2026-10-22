@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import Page, { SLOTS_PER_PAGE } from "./components/Page.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
 import PrintingPicker from "./components/PrintingPicker.jsx";
-import SqlOverlay from "./components/SqlOverlay.jsx";
+import SignIn from "./components/SignIn.jsx";
 import { fetchAndMergeCollections, prefetchPageImages } from "./lib/cards.js";
-import { buildOwnershipSql } from "./lib/ownership.js";
+import { saveOwnership } from "./lib/ownership.js";
+import { supabase } from "./lib/supabase.js";
 
 const PORTRAIT_QUERY = "(orientation: portrait)";
 // Minimum horizontal distance (px) for a touch to count as a page-turn swipe
@@ -34,7 +35,10 @@ export default function App() {
   // Slot card id -> { name, printing, foiling } for each printing chosen in edit mode
   const [selections, setSelections] = useState(new Map());
   const [editingCard, setEditingCard] = useState(null);
-  const [sql, setSql] = useState(null);
+  const [session, setSession] = useState(null);
+  const [signingIn, setSigningIn] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
   const isPortrait = usePortrait();
   const touchStart = useRef(null);
   // Landscape shows a spread starting on an even page; portrait shows one page, skipping the blank inside cover
@@ -45,6 +49,20 @@ export default function App() {
 
   useEffect(() => {
     fetchAndMergeCollections().then(setCards);
+  }, []);
+
+  // Fires with the stored session on load, after a magic link sign-in, and on sign-out
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (newSession) {
+        setSigningIn(false);
+      } else {
+        setEditMode(false);
+        setSelections(new Map());
+      }
+    });
+    return () => data.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -103,11 +121,21 @@ export default function App() {
     setEditingCard(null);
   }
 
-  // Leaving edit mode turns the chosen printings into SQL
-  function toggleEditMode() {
+  // Leaving edit mode saves the chosen printings; on failure stay in edit mode so they can be retried
+  async function toggleEditMode() {
     if (editMode && selections.size > 0) {
-      setSql(buildOwnershipSql(selections));
+      setSaving(true);
+      setSaveError(null);
+      try {
+        await saveOwnership(selections);
+      } catch (err) {
+        setSaveError(err.message);
+        return;
+      } finally {
+        setSaving(false);
+      }
       setSelections(new Map());
+      fetchAndMergeCollections().then(setCards);
     }
     setEditMode(!editMode);
   }
@@ -135,12 +163,27 @@ export default function App() {
       >
         &larr; Adam Henderson
       </a>
-      <button
-        className={`edit-button${editMode ? " active" : ""}`}
-        onClick={toggleEditMode}
-      >
-        {editMode ? `Done (${selections.size})` : "Edit"}
-      </button>
+      <div className="toolbar">
+        {saveError && <span className="toolbar-error">{saveError}</span>}
+        {session ? (
+          <>
+            <button
+              className={`edit-button${editMode ? " active" : ""}`}
+              onClick={toggleEditMode}
+              disabled={saving}
+            >
+              {saving ? "Saving…" : editMode ? `Done (${selections.size})` : "Edit"}
+            </button>
+            <button className="edit-button" onClick={() => supabase.auth.signOut()}>
+              Sign out
+            </button>
+          </>
+        ) : (
+          <button className="edit-button" onClick={() => setSigningIn(true)}>
+            Sign in
+          </button>
+        )}
+      </div>
       <div className={`binder-container${editMode ? " editing" : ""}`}>
         <div
           className="binder"
@@ -215,7 +258,7 @@ export default function App() {
           onClose={() => setEditingCard(null)}
         />
       )}
-      <SqlOverlay sql={sql} onClose={() => setSql(null)} />
+      {signingIn && <SignIn onClose={() => setSigningIn(false)} />}
     </>
   );
 }

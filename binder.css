@@ -187,11 +187,24 @@ body {
   }
 }
 
-.edit-button {
+.toolbar {
   position: fixed;
   top: 4px;
   right: 12px;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-error {
+  font:
+    13px system-ui,
+    sans-serif;
+  color: #f87171;
+}
+
+.edit-button {
   font:
     14px system-ui,
     sans-serif;
@@ -206,6 +219,11 @@ body {
 .edit-button.active {
   background: #c2410c;
   border-color: #c2410c;
+}
+
+.edit-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .binder-container.editing .binder {
@@ -290,18 +308,23 @@ body {
   border-color: #c2410c;
 }
 
-.sql-output {
-  width: 100%;
-  min-height: 60vh;
-  font:
-    13px ui-monospace,
-    monospace;
-  color: #eee;
-  background: #222;
-  border: 1px solid #555;
-  border-radius: 6px;
-  padding: 8px;
-  resize: none;
+.sign-in {
+  width: min(420px, 100%);
+}
+
+.sign-in form {
+  display: flex;
+  gap: 8px;
+}
+
+.sign-in input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+}
+
+.sign-in p {
+  margin: 0;
 }
 
 .finish-selector {

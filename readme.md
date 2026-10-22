@@ -14,6 +14,10 @@ A virtual card binder for a Magic: The Gathering legendary creature collection. 
 - Collection and card lists: Supabase (`cards`, `card_ownership` and `binder_slots` tables). `binder_slots` sets the book, page and slot of each card.
 - Card images: a Scryfall image cache at `fanable.verbatiam.dev`
 
+## Editing ownership
+
+Sign in with an email magic link to get the Edit button. Choosing printings in edit mode and pressing Done saves them through the `set_ownership` database function. Only users listed in `binder_owners` can write, which row level security enforces; see [supabase/migrations](supabase/migrations).
+
 ## Development
 
 Requires Node 26 (see `.nvmrc`).
@@ -43,7 +47,7 @@ Every push to `main` builds the site and deploys it to GitHub Pages via [.github
 6. ~~Replace API call to point to Supabase postgres~~
 7. Convert PowerShell script to an Azure funtion
 8. Create an Azure function to update owned cards
-9. Allow updates via Javascript on page
+9. ~~Allow updates via Javascript on page~~
 10. ~~Visualise folder~~
     - ~~Lookup card images~~
     - ~~Arrange into grid, navigate via book and page~~
