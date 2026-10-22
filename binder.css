@@ -274,6 +274,11 @@ body {
   margin-left: 8px;
 }
 
+.remove-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

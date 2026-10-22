@@ -32,7 +32,8 @@ export default function App() {
   const [jumpValue, setJumpValue] = useState("");
   const [overlayImage, setOverlayImage] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  // Slot card id -> { name, printing, foiling } for each printing chosen in edit mode
+  // Slot card id -> { name, printing, foiling } for each printing chosen in edit mode,
+  // or { name, remove: true } for each card removed from the collection
   const [selections, setSelections] = useState(new Map());
   const [editingCard, setEditingCard] = useState(null);
   const [session, setSession] = useState(null);
@@ -118,6 +119,12 @@ export default function App() {
   function pickPrinting(printing, foiling) {
     const card = editingCard;
     setSelections((prev) => new Map(prev).set(card.id, { name: card.name, printing, foiling }));
+    setEditingCard(null);
+  }
+
+  function removeCard() {
+    const card = editingCard;
+    setSelections((prev) => new Map(prev).set(card.id, { name: card.name, remove: true }));
     setEditingCard(null);
   }
 
@@ -255,6 +262,7 @@ export default function App() {
           card={editingCard}
           selection={selections.get(editingCard.id)}
           onPick={pickPrinting}
+          onRemove={removeCard}
           onClose={() => setEditingCard(null)}
         />
       )}

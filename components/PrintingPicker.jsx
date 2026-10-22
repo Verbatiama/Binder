@@ -7,7 +7,7 @@ const FINISHES = [
   { value: "etched", label: "Etched" },
 ];
 
-export default function PrintingPicker({ card, selection, onPick, onClose }) {
+export default function PrintingPicker({ card, selection, onPick, onRemove, onClose }) {
   const [printings, setPrintings] = useState(null);
   const [error, setError] = useState(null);
   const [finish, setFinish] = useState(selection?.foiling ?? "nonfoil");
@@ -46,6 +46,14 @@ export default function PrintingPicker({ card, selection, onPick, onClose }) {
               </button>
             ))}
           </div>
+          {/* Already unowned cards have nothing to remove */}
+          <button
+            className="remove-button"
+            disabled={card.owned === 0 || selection?.remove}
+            onClick={onRemove}
+          >
+            {selection?.remove ? "Removed" : "Remove from collection"}
+          </button>
           <button onClick={onClose}>Close</button>
         </div>
         {error && <p>{error}</p>}
@@ -55,7 +63,7 @@ export default function PrintingPicker({ card, selection, onPick, onClose }) {
             <button
               key={printing.id}
               className={`printing${
-                printing.id === selection?.printing.id && activeFinish === selection.foiling
+                printing.id === selection?.printing?.id && activeFinish === selection.foiling
                   ? " selected"
                   : ""
               }`}
