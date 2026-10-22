@@ -23,6 +23,9 @@ export default function CardSlot({ image, selected, editMode, onSelect }) {
           onClick={() => onSelect(image)}
         />
       )}
+      {loaded && image.finish !== "nonfoil" && (
+        <span className={`foil-overlay ${image.finish}`} aria-hidden="true" />
+      )}
       {/* In edit mode, mark cards whose owned printing is already recorded */}
       {editMode && image?.isSpecific && (
         <span className="specific-check" title="Printing recorded">
