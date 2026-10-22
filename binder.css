@@ -556,9 +556,9 @@ body {
     var(--bg-x) var(--bg-y),
     var(--bg-x) var(--bg-y);
   background-blend-mode: difference, difference, luminosity, soft-light, normal;
-  filter: brightness(0.95) contrast(2);
+  filter: brightness(0.8) contrast(1.8);
   mix-blend-mode: color-dodge;
-  opacity: 0.85;
+  opacity: 0.46;
 }
 
 /* Bright metallic streaks that catch the light as it passes */
@@ -609,7 +609,7 @@ body {
 
 .finish.etched .finish-glare {
   mix-blend-mode: soft-light;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 @media (prefers-reduced-motion: reduce) {
