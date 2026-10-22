@@ -68,8 +68,9 @@ export default function PrintingPicker({ card, selection, onPick, onClose }) {
                   alt={printing.set_name}
                   loading="lazy"
                   style={{
-                    filter:
-                      printing.image.owned === 0 ? "grayscale(100%) brightness(0.6)" : undefined,
+                    filter: !printing.finishes.includes(activeFinish)
+                      ? "grayscale(100%) brightness(0.6)"
+                      : undefined,
                   }}
                 />
               )}
