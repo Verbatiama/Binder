@@ -8,6 +8,7 @@ export default function Menu({
   onJump,
   cardNames,
   onFindCards,
+  onSortNames,
   session,
   editMode,
   editCount,
@@ -66,14 +67,18 @@ export default function Menu({
     setOpen(false);
   }
 
-  // In multi-line mode each line is a card name.
-  // Stay open when any name matches no card so the message is visible.
-  function findCards(event) {
-    event.preventDefault();
-    const names = cardQuery
+  // In multi-line mode each line is a card name
+  function queryNames() {
+    return cardQuery
       .split("\n")
       .map((name) => name.trim())
       .filter(Boolean);
+  }
+
+  // Stay open when any name matches no card so the message is visible
+  function findCards(event) {
+    event.preventDefault();
+    const names = queryNames();
     if (names.length === 0) return;
     const missing = onFindCards(names);
     setNotFound(missing);
@@ -147,7 +152,15 @@ export default function Menu({
                   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) findCards(e);
                 }}
               />
-              <button type="submit">Go</button>
+              <div className="menu-find-actions">
+                <button
+                  type="button"
+                  onClick={() => changeQuery(onSortNames(queryNames()).join("\n"))}
+                >
+                  Sort
+                </button>
+                <button type="submit">Go</button>
+              </div>
             </div>
           ) : (
             <div className="menu-jump">

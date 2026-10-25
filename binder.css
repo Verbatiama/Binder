@@ -310,7 +310,13 @@ body {
   resize: vertical;
 }
 
-#menu .menu-find-multiline button {
+.menu-find-actions {
+  display: flex;
+  gap: 8px;
+}
+
+#menu .menu-find-actions button {
+  flex: 1;
   text-align: center;
 }
 

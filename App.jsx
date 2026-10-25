@@ -138,17 +138,21 @@ export default function App() {
     setHighlightedIds(new Set([card.id]));
   }
 
-  // Matches each name (an exact match, else the first card containing it) and turns to the first
-  // card found. Finding several starts stepping through them. Returns the names that matched no card.
+  // Index in cards of the card with this name: an exact match, else the first containing it, or -1
+  function matchCard(name) {
+    const search = name.toLowerCase();
+    const exact = cards.findIndex((c) => c.name.toLowerCase() === search);
+    return exact !== -1 ? exact : cards.findIndex((c) => c.name.toLowerCase().includes(search));
+  }
+
+  // Turns to the first card found. Finding several starts stepping through them.
+  // Returns the names that matched no card.
   function findCards(names) {
     if (!cards) return names;
     const found = [];
     const missing = [];
     for (const name of names) {
-      const search = name.toLowerCase();
-      const card =
-        cards.find((c) => c.name.toLowerCase() === search) ??
-        cards.find((c) => c.name.toLowerCase().includes(search));
+      const card = cards[matchCard(name)];
       if (card) found.push(card);
       else missing.push(name);
     }
@@ -156,6 +160,17 @@ export default function App() {
     setSearchIndex(0);
     if (found.length > 0) showCard(found[0]);
     return missing;
+  }
+
+  // Cards are loaded in binder order, so sorting by their index puts the names in that order.
+  // Names that match no card go last.
+  function sortByBinderOrder(names) {
+    if (!cards) return names;
+    const position = (name) => {
+      const index = matchCard(name);
+      return index === -1 ? Infinity : index;
+    };
+    return names.toSorted((a, b) => position(a) - position(b));
   }
 
   function jumpToPage(target) {
@@ -222,6 +237,7 @@ export default function App() {
         onJump={jumpToPage}
         cardNames={cardNames}
         onFindCards={findCards}
+        onSortNames={sortByBinderOrder}
         session={session}
         editMode={editMode}
         editCount={selections.size}
