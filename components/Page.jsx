@@ -25,7 +25,7 @@ export default function Page({
           key={i}
           image={image}
           selected={image && selections.has(image.id)}
-          highlighted={image && highlightedIds?.has(image.id)}
+          highlightedIds={highlightedIds}
           editMode={editMode}
           onSelect={onSelect}
         />

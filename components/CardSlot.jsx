@@ -1,13 +1,27 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import cardBack from "../assets/card-back.svg";
 
-export default function CardSlot({ image, selected, highlighted, editMode, onSelect }) {
+export default function CardSlot({ image, selected, highlightedIds, editMode, onSelect }) {
   // Tracks which url has finished loading, so a new page's image starts hidden again
   const [loadedUrl, setLoadedUrl] = useState(null);
   const loaded = image && loadedUrl === image.url;
+  const highlighted = Boolean(image && highlightedIds?.has(image.id));
+  const slotRef = useRef(null);
+
+  // Each search creates a new set of ids, so restart the pulse even when this slot stays highlighted
+  useEffect(() => {
+    if (!highlighted) return;
+    for (const animation of slotRef.current.getAnimations()) {
+      if (animation.animationName === "card-highlight") {
+        animation.cancel();
+        animation.play();
+      }
+    }
+  }, [highlighted, highlightedIds]);
 
   return (
     <div
+      ref={slotRef}
       className={`card-slot${selected ? " selected" : ""}${highlighted ? " highlighted" : ""}`}
     >
       {/* Keyed by url so its delayed fade-in restarts for each new image */}
