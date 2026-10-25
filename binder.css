@@ -143,19 +143,35 @@ body {
   letter-spacing: 2px;
 }
 
-.jump-to-page {
+/* Shown while page turns step through the cards from a search */
+.search-status {
   display: flex;
   align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font:
+    14px system-ui,
+    sans-serif;
+  letter-spacing: normal;
+  color: #facc15;
 }
 
-.jump-to-page label {
-  margin-right: 8px;
+.search-status-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.jump-to-page input {
-  width: 60px;
-  margin-right: 8px;
+.search-status button {
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 6px;
+  color: #fff;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
+
 @media (orientation: portrait) {
   :root {
     --binder-pad-x: 32px;
@@ -187,43 +203,127 @@ body {
   }
 }
 
-.toolbar {
+.menu-toggle {
   position: fixed;
-  top: 4px;
-  right: 12px;
-  z-index: 10;
+  top: 30px;
+  left: 8px;
+  z-index: 30;
+  font-size: 22px;
+  line-height: 1;
+  padding: 4px 6px;
+  color: #c2410c;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+#menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 20;
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 200px;
+  padding: 72px 16px 16px;
+  background-color: #2e2e2e;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  transform: translateX(-110%);
+  transition: transform 0.2s ease;
+}
+
+#menu.open {
+  transform: translateX(0);
+}
+
+#menu button {
+  font:
+    16px system-ui,
+    sans-serif;
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+#menu button:disabled {
+  cursor: wait;
+}
+
+#menu label {
+  display: block;
+  margin-bottom: 8px;
+  font:
+    14px system-ui,
+    sans-serif;
+}
+
+#menu input {
+  flex: 1;
+  min-width: 0;
+  font:
+    16px system-ui,
+    sans-serif;
+  padding: 6px 8px;
+}
+
+/* Account actions sit at the bottom of the drawer */
+.menu-account {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.menu-label-row {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 8px;
+}
+
+#menu .menu-label-row label {
+  margin-bottom: 0;
+}
+
+#menu .menu-multiline-toggle {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 1;
+  text-align: center;
+}
+
+.menu-find-multiline {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.toolbar-error {
+#menu textarea {
+  width: 100%;
+  font:
+    16px system-ui,
+    sans-serif;
+  padding: 6px 8px;
+  resize: vertical;
+}
+
+#menu .menu-find-multiline button {
+  text-align: center;
+}
+
+.menu-jump {
+  display: flex;
+  gap: 8px;
+}
+
+.menu-error {
   font:
     13px system-ui,
     sans-serif;
   color: #f87171;
-}
-
-.edit-button {
-  font:
-    14px system-ui,
-    sans-serif;
-  color: #fff;
-  background: #555;
-  border: 1px solid #888;
-  border-radius: 6px;
-  padding: 4px 12px;
-  cursor: pointer;
-}
-
-.edit-button.active {
-  background: #c2410c;
-  border-color: #c2410c;
-}
-
-.edit-button:disabled {
-  opacity: 0.6;
-  cursor: wait;
 }
 
 .binder-container.editing .binder {
@@ -234,6 +334,24 @@ body {
 
 .card-slot.selected {
   border: 3px solid #c2410c;
+}
+
+/* A card found by name pulses so it stands out on the page */
+.card-slot.highlighted {
+  z-index: 3;
+  animation: card-highlight 1s ease-in-out 3;
+}
+
+@keyframes card-highlight {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px #facc15,
+      0 0 24px 6px rgba(250, 204, 21, 0.7);
+  }
 }
 
 .picker-overlay {

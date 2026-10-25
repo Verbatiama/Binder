@@ -1,13 +1,15 @@
 import { useState } from "react";
 import cardBack from "../assets/card-back.svg";
 
-export default function CardSlot({ image, selected, editMode, onSelect }) {
+export default function CardSlot({ image, selected, highlighted, editMode, onSelect }) {
   // Tracks which url has finished loading, so a new page's image starts hidden again
   const [loadedUrl, setLoadedUrl] = useState(null);
   const loaded = image && loadedUrl === image.url;
 
   return (
-    <div className={`card-slot${selected ? " selected" : ""}`}>
+    <div
+      className={`card-slot${selected ? " selected" : ""}${highlighted ? " highlighted" : ""}`}
+    >
       {/* Keyed by url so its delayed fade-in restarts for each new image */}
       <img key={image?.url} src={cardBack} alt="Card back" className="card-back" />
       {image && (

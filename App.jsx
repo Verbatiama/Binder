@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Page, { SLOTS_PER_PAGE } from "./components/Page.jsx";
 import CardOverlay from "./components/CardOverlay.jsx";
+import Menu from "./components/Menu.jsx";
 import PrintingPicker from "./components/PrintingPicker.jsx";
 import SignIn from "./components/SignIn.jsx";
 import { fetchAndMergeCollections, prefetchPageImages } from "./lib/cards.js";
@@ -10,6 +11,8 @@ import { supabase } from "./lib/supabase.js";
 const PORTRAIT_QUERY = "(orientation: portrait)";
 // Minimum horizontal distance (px) for a touch to count as a page-turn swipe
 const SWIPE_THRESHOLD = 50;
+// How long cards found by name stay highlighted
+const HIGHLIGHT_DURATION = 3000;
 
 function usePortrait() {
   const [isPortrait, setIsPortrait] = useState(
@@ -29,8 +32,13 @@ function usePortrait() {
 export default function App() {
   const [cards, setCards] = useState(null);
   const [page, setPage] = useState(0);
-  const [jumpValue, setJumpValue] = useState("");
   const [overlayImage, setOverlayImage] = useState(null);
+  // Ids of the cards found by name, or null when nothing is highlighted
+  const [highlightedIds, setHighlightedIds] = useState(null);
+  // Cards found by a search for several names, in the order searched; page turns step through
+  // them while it's set
+  const [searchResults, setSearchResults] = useState(null);
+  const [searchIndex, setSearchIndex] = useState(0);
   const [editMode, setEditMode] = useState(false);
   // Slot card id -> { name, printing, foiling } for each printing chosen in edit mode,
   // or { name, remove: true } for each card removed from the collection
@@ -52,6 +60,17 @@ export default function App() {
     fetchAndMergeCollections().then(setCards);
   }, []);
 
+  const cardNames = useMemo(
+    () => (cards ? [...new Set(cards.map((card) => card.name))].sort() : []),
+    [cards],
+  );
+
+  useEffect(() => {
+    if (!highlightedIds) return;
+    const timeout = setTimeout(() => setHighlightedIds(null), HIGHLIGHT_DURATION);
+    return () => clearTimeout(timeout);
+  }, [highlightedIds]);
+
   // Fires with the stored session on load, after a magic link sign-in, and on sign-out
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -66,10 +85,6 @@ export default function App() {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    setJumpValue(String(displayedPage));
-  }, [displayedPage]);
-
   // Prefetch the previous and next page (portrait) or spread (landscape)
   useEffect(() => {
     if (!cards) return;
@@ -80,6 +95,13 @@ export default function App() {
   }, [cards, isPortrait, singlePage, leftPage]);
 
   function changePage(direction) {
+    if (searchResults) {
+      const next = searchIndex + direction;
+      if (next < 0 || next >= searchResults.length) return;
+      setSearchIndex(next);
+      showCard(searchResults[next]);
+      return;
+    }
     if (isPortrait) {
       if (singlePage + direction < 1) return;
       setPage(singlePage + direction);
@@ -111,6 +133,36 @@ export default function App() {
     changePage(dx < 0 ? 1 : -1);
   }
 
+  function showCard(card) {
+    setPage(card.Page);
+    setHighlightedIds(new Set([card.id]));
+  }
+
+  // Matches each name (an exact match, else the first card containing it) and turns to the first
+  // card found. Finding several starts stepping through them. Returns the names that matched no card.
+  function findCards(names) {
+    if (!cards) return names;
+    const found = [];
+    const missing = [];
+    for (const name of names) {
+      const search = name.toLowerCase();
+      const card =
+        cards.find((c) => c.name.toLowerCase() === search) ??
+        cards.find((c) => c.name.toLowerCase().includes(search));
+      if (card) found.push(card);
+      else missing.push(name);
+    }
+    setSearchResults(found.length > 1 ? found : null);
+    setSearchIndex(0);
+    if (found.length > 0) showCard(found[0]);
+    return missing;
+  }
+
+  function jumpToPage(target) {
+    setSearchResults(null);
+    setPage(target);
+  }
+
   function selectCard(image) {
     if (editMode) setEditingCard(image);
     else setOverlayImage(image);
@@ -128,7 +180,8 @@ export default function App() {
     setEditingCard(null);
   }
 
-  // Leaving edit mode saves the chosen printings; on failure stay in edit mode so they can be retried
+  // Leaving edit mode saves the chosen printings; on failure stay in edit mode so they can be retried.
+  // Returns whether the mode changed.
   async function toggleEditMode() {
     if (editMode && selections.size > 0) {
       setSaving(true);
@@ -137,7 +190,7 @@ export default function App() {
         await saveOwnership(selections);
       } catch (err) {
         setSaveError(err.message);
-        return;
+        return false;
       } finally {
         setSaving(false);
       }
@@ -145,13 +198,7 @@ export default function App() {
       fetchAndMergeCollections().then(setCards);
     }
     setEditMode(!editMode);
-  }
-
-  function jumpToPage(event) {
-    event.preventDefault();
-    const target = parseInt(jumpValue, 10);
-    if (isNaN(target) || target < 1) return;
-    setPage(target);
+    return true;
   }
 
   return (
@@ -162,7 +209,7 @@ export default function App() {
           position: "fixed",
           top: "8px",
           left: "12px",
-          zIndex: 10,
+          zIndex: 30,
           font: "14px system-ui,sans-serif",
           color: "#c2410c",
           textDecoration: "none",
@@ -170,27 +217,20 @@ export default function App() {
       >
         &larr; Adam Henderson
       </a>
-      <div className="toolbar">
-        {saveError && <span className="toolbar-error">{saveError}</span>}
-        {session ? (
-          <>
-            <button
-              className={`edit-button${editMode ? " active" : ""}`}
-              onClick={toggleEditMode}
-              disabled={saving}
-            >
-              {saving ? "Saving…" : editMode ? `Done (${selections.size})` : "Edit"}
-            </button>
-            <button className="edit-button" onClick={() => supabase.auth.signOut()}>
-              Sign out
-            </button>
-          </>
-        ) : (
-          <button className="edit-button" onClick={() => setSigningIn(true)}>
-            Sign in
-          </button>
-        )}
-      </div>
+      <Menu
+        currentPage={displayedPage}
+        onJump={jumpToPage}
+        cardNames={cardNames}
+        onFindCards={findCards}
+        session={session}
+        editMode={editMode}
+        editCount={selections.size}
+        saving={saving}
+        saveError={saveError}
+        onToggleEdit={toggleEditMode}
+        onSignIn={() => setSigningIn(true)}
+        onSignOut={() => supabase.auth.signOut()}
+      />
       <div className={`binder-container${editMode ? " editing" : ""}`}>
         <div
           className="binder"
@@ -209,6 +249,7 @@ export default function App() {
               pageNumber={singlePage}
               cards={cards}
               selections={selections}
+              highlightedIds={highlightedIds}
               editMode={editMode}
               onSelect={selectCard}
             />
@@ -219,6 +260,7 @@ export default function App() {
                 pageNumber={leftPage}
                 cards={cards}
                 selections={selections}
+                highlightedIds={highlightedIds}
               editMode={editMode}
               onSelect={selectCard}
               />
@@ -227,6 +269,7 @@ export default function App() {
                 pageNumber={rightPage}
                 cards={cards}
                 selections={selections}
+                highlightedIds={highlightedIds}
               editMode={editMode}
               onSelect={selectCard}
               />
@@ -242,17 +285,16 @@ export default function App() {
           <span id="left-page-number">
             {isPortrait ? singlePage : leftPage}
           </span>
-          <form className="jump-to-page" onSubmit={jumpToPage}>
-            <label htmlFor="jump-page-input">Jump to page:</label>
-            <input
-              type="number"
-              id="jump-page-input"
-              min="1"
-              value={jumpValue}
-              onChange={(e) => setJumpValue(e.target.value)}
-            />
-            <button type="submit">Go</button>
-          </form>
+          {searchResults && (
+            <span className="search-status">
+              <span className="search-status-name">
+                {searchIndex + 1} / {searchResults.length}: {searchResults[searchIndex].name}
+              </span>
+              <button onClick={() => setSearchResults(null)} aria-label="End search">
+                &times;
+              </button>
+            </span>
+          )}
           {!isPortrait && <span id="right-page-number">{rightPage}</span>}
         </div>
       </div>
