@@ -8,25 +8,65 @@ import { fetchAndMergeCollections, prefetchPageImages } from "./lib/cards.js";
 import { saveOwnership } from "./lib/ownership.js";
 import { supabase } from "./lib/supabase.js";
 
-const PORTRAIT_QUERY = "(orientation: portrait)";
 // Minimum horizontal distance (px) for a touch to count as a page-turn swipe
 const SWIPE_THRESHOLD = 50;
 // How long cards found by name stay highlighted
 const HIGHLIGHT_DURATION = 3000;
+// Card proportions (width / height) of the card images
+const CARD_ASPECT = 488 / 680;
+// Page gap and padding as fractions of the card width
+const PAGE_GAP = 0.05;
+const PAGE_PAD = 0.1;
+// Page size in card widths: 3 cards, 2 gaps and padding on both sides
+const PAGE_WIDTH = 3 + 2 * PAGE_GAP + 2 * PAGE_PAD;
+const PAGE_HEIGHT = 3 / CARD_ASPECT + 2 * PAGE_GAP + 2 * PAGE_PAD;
+// Show a two-page spread unless its cards would be smaller than this fraction of a single page's
+const SPREAD_MIN_SCALE = 0.75;
 
-function usePortrait() {
-  const [isPortrait, setIsPortrait] = useState(
-    () => window.matchMedia(PORTRAIT_QUERY).matches,
+function cssPx(styles, name) {
+  return parseFloat(styles.getPropertyValue(name)) || 0;
+}
+
+// Picks one page or a spread and the card width (px) that fits the viewport without distorting cards
+function computeLayout() {
+  const styles = getComputedStyle(document.documentElement);
+  const availWidth =
+    window.innerWidth -
+    2 * cssPx(styles, "--side-gutter") -
+    2 * cssPx(styles, "--binder-pad-x");
+  const availHeight =
+    window.innerHeight -
+    cssPx(styles, "--top-gutter") -
+    cssPx(styles, "--side-gutter") -
+    2 * cssPx(styles, "--binder-pad-y") -
+    cssPx(styles, "--page-numbers-height");
+  const byHeight = availHeight / PAGE_HEIGHT;
+  const single = Math.min(byHeight, availWidth / PAGE_WIDTH);
+  const spread = Math.min(
+    byHeight,
+    (availWidth - cssPx(styles, "--binder-gap")) / (2 * PAGE_WIDTH),
   );
+  const singlePage = spread < single * SPREAD_MIN_SCALE;
+  const cardWidth = Math.max(Math.floor(singlePage ? single : spread), 1);
+  return { singlePage, cardWidth };
+}
+
+function useBinderLayout() {
+  const [layout, setLayout] = useState(computeLayout);
 
   useEffect(() => {
-    const query = window.matchMedia(PORTRAIT_QUERY);
-    const onChange = (event) => setIsPortrait(event.matches);
-    query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
+    const onResize = () =>
+      setLayout((prev) => {
+        const next = computeLayout();
+        return next.singlePage === prev.singlePage && next.cardWidth === prev.cardWidth
+          ? prev
+          : next;
+      });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  return isPortrait;
+  return layout;
 }
 
 export default function App() {
@@ -48,13 +88,13 @@ export default function App() {
   const [signingIn, setSigningIn] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const isPortrait = usePortrait();
+  const { singlePage: showSinglePage, cardWidth } = useBinderLayout();
   const touchStart = useRef(null);
-  // Landscape shows a spread starting on an even page; portrait shows one page, skipping the blank inside cover
+  // A spread starts on an even page; a single page view skips the blank inside cover
   const leftPage = page - (page % 2);
   const rightPage = leftPage + 1;
   const singlePage = Math.max(page, 1);
-  const displayedPage = isPortrait ? singlePage : Math.max(leftPage, 1);
+  const displayedPage = showSinglePage ? singlePage : Math.max(leftPage, 1);
 
   useEffect(() => {
     fetchAndMergeCollections().then(setCards);
@@ -85,14 +125,14 @@ export default function App() {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  // Prefetch the previous and next page (portrait) or spread (landscape)
+  // Prefetch the previous and next page or spread
   useEffect(() => {
     if (!cards) return;
-    const pages = isPortrait
+    const pages = showSinglePage
       ? [singlePage - 1, singlePage + 1]
       : [leftPage - 2, leftPage - 1, leftPage + 2, leftPage + 3];
     pages.forEach((p) => prefetchPageImages(cards, p, SLOTS_PER_PAGE));
-  }, [cards, isPortrait, singlePage, leftPage]);
+  }, [cards, showSinglePage, singlePage, leftPage]);
 
   function changePage(direction) {
     if (searchResults) {
@@ -102,7 +142,7 @@ export default function App() {
       showCard(searchResults[next]);
       return;
     }
-    if (isPortrait) {
+    if (showSinglePage) {
       if (singlePage + direction < 1) return;
       setPage(singlePage + direction);
     } else {
@@ -247,7 +287,15 @@ export default function App() {
         onSignIn={() => setSigningIn(true)}
         onSignOut={() => supabase.auth.signOut()}
       />
-      <div className={`binder-container${editMode ? " editing" : ""}`}>
+      <div
+        className={`binder-container${editMode ? " editing" : ""}`}
+        style={{
+          "--card-w": `${cardWidth}px`,
+          "--card-h": `${cardWidth / CARD_ASPECT}px`,
+          "--page-gap": `${cardWidth * PAGE_GAP}px`,
+          "--page-pad": `${cardWidth * PAGE_PAD}px`,
+        }}
+      >
         <div
           className="binder"
           onTouchStart={onTouchStart}
@@ -259,7 +307,7 @@ export default function App() {
             onClick={() => changePage(-1)}
             title="Previous"
           ></div>
-          {isPortrait ? (
+          {showSinglePage ? (
             <Page
               id="single-page"
               pageNumber={singlePage}
@@ -299,7 +347,7 @@ export default function App() {
         </div>
         <div className="page-numbers">
           <span id="left-page-number">
-            {isPortrait ? singlePage : leftPage}
+            {showSinglePage ? singlePage : leftPage}
           </span>
           {searchResults && (
             <span className="search-status">
@@ -311,7 +359,7 @@ export default function App() {
               </button>
             </span>
           )}
-          {!isPortrait && <span id="right-page-number">{rightPage}</span>}
+          {!showSinglePage && <span id="right-page-number">{rightPage}</span>}
         </div>
       </div>
       <CardOverlay image={overlayImage} onClose={() => setOverlayImage(null)} />
